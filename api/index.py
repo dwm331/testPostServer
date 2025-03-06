@@ -1,48 +1,30 @@
-def handler(event, context):
-    try:
-        method = event.get('httpMethod', 'GET')
-        path = event.get('path', '')
+from flask import Flask, request, jsonify
 
-        if method == 'GET':
-            if path == '/api/post':
-                return {
-                    'statusCode': 200,
-                    'body': '{"message": "This is a GET response from /api/post"}',
-                    'headers': {'Content-Type': 'application/json'},
-                    'isBase64Encoded': False
-                }
-            elif path == '/':
-                return {
-                    'statusCode': 200,
-                    'body': '{"message": "Welcome to the root directory", "available_endpoints": ["/api/post"]}',
-                    'headers': {'Content-Type': 'application/json'},
-                    'isBase64Encoded': False
-                }
-            else:
-                return {
-                    'statusCode': 404,
-                    'body': '{"error": "Not Found"}',
-                    'headers': {'Content-Type': 'application/json'},
-                    'isBase64Encoded': False
-                }
-        elif method == 'POST' and path == '/api/post':
-            return {
-                'statusCode': 200,
-                'body': '{"message": "Hello from POST /api/post"}',
-                'headers': {'Content-Type': 'application/json'},
-                'isBase64Encoded': False
-            }
-        else:
-            return {
-                'statusCode': 405,
-                'body': '{"error": "Method Not Allowed"}',
-                'headers': {'Content-Type': 'application/json'},
-                'isBase64Encoded': False
-            }
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': f'{{"error": "Server error: {str(e)}"}}',
-            'headers': {'Content-Type': 'application/json'},
-            'isBase64Encoded': False
-        }
+app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({
+        'message': 'Welcome to the root directory',
+        'available_endpoints': ['/api/post']
+    })
+
+@app.route('/api/post', methods=['GET'])
+def get_post():
+    return jsonify({
+        'message': 'This is a GET response from /api/post'
+    })
+
+@app.route('/api/post', methods=['POST'])
+def post_post():
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({'error': 'Invalid JSON format'}), 400
+    return jsonify({
+        'received_data': data,
+        'message': 'Data received successfully'
+    })
+
+# Vercel 會自動處理 WSGI 入口點
+if __name__ == '__main__':
+    app.run()

@@ -9,7 +9,6 @@
   "routes": [
     {
       "src": "/api/post",
-      "methods": ["POST"],
       "dest": "api/index.py"
     }
   ]

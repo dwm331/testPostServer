@@ -1,40 +1,48 @@
 def handler(event, context):
-    method = event.get('httpMethod')
-    path = event.get('path', '')
+    try:
+        method = event.get('httpMethod', 'GET')
+        path = event.get('path', '')
 
-    # 處理 GET 請求
-    if method == 'GET':
-        if path == '/api/post':
+        if method == 'GET':
+            if path == '/api/post':
+                return {
+                    'statusCode': 200,
+                    'body': '{"message": "This is a GET response from /api/post"}',
+                    'headers': {'Content-Type': 'application/json'},
+                    'isBase64Encoded': False
+                }
+            elif path == '/':
+                return {
+                    'statusCode': 200,
+                    'body': '{"message": "Welcome to the root directory", "available_endpoints": ["/api/post"]}',
+                    'headers': {'Content-Type': 'application/json'},
+                    'isBase64Encoded': False
+                }
+            else:
+                return {
+                    'statusCode': 404,
+                    'body': '{"error": "Not Found"}',
+                    'headers': {'Content-Type': 'application/json'},
+                    'isBase64Encoded': False
+                }
+        elif method == 'POST' and path == '/api/post':
             return {
                 'statusCode': 200,
-                'body': '{"message": "This is a GET response from /api/post"}',
-                'headers': {'Content-Type': 'application/json'}
-            }
-        elif path == '/':
-            return {
-                'statusCode': 200,
-                'body': '{"message": "Welcome to the root directory", "available_endpoints": ["/api/post"]}',
-                'headers': {'Content-Type': 'application/json'}
+                'body': '{"message": "Hello from POST /api/post"}',
+                'headers': {'Content-Type': 'application/json'},
+                'isBase64Encoded': False
             }
         else:
             return {
-                'statusCode': 404,
-                'body': '{"error": "Not Found"}',
-                'headers': {'Content-Type': 'application/json'}
+                'statusCode': 405,
+                'body': '{"error": "Method Not Allowed"}',
+                'headers': {'Content-Type': 'application/json'},
+                'isBase64Encoded': False
             }
-
-    # 處理 POST 請求
-    elif method == 'POST' and path == '/api/post':
+    except Exception as e:
         return {
-            'statusCode': 200,
-            'body': '{"message": "Hello from POST /api/post"}',
-            'headers': {'Content-Type': 'application/json'}
-        }
-
-    # 其他情況
-    else:
-        return {
-            'statusCode': 405,
-            'body': '{"error": "Method Not Allowed"}',
-            'headers': {'Content-Type': 'application/json'}
+            'statusCode': 500,
+            'body': f'{{"error": "Server error: {str(e)}"}}',
+            'headers': {'Content-Type': 'application/json'},
+            'isBase64Encoded': False
         }
